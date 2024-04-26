@@ -92,39 +92,68 @@ def dump_step_data(day, stp):
 			print(format(minutes_as_time(activity['start'])),"-",minutes_as_time(activity['stop']),
 				activity['step'],'steps',activity_type)
 
-def get_band_data(auth_info):
-	print("Retrieveing mi band data")
-	band_data_url='https://api-mifit.huami.com/v1/data/band_data.json'
+def get_watchface(auth_info,url):
+	print("Retrieveing watchface")
+	band_data_url=url
 	headers={
 		'apptoken': auth_info['token_info']['app_token'],
 	}
 	data={
-		'query_type': 'summary',
 		'device_type': 'android_phone',
 		'userid': auth_info['token_info']['user_id'],
-		'from_date': '2019-01-01',
-		'to_date': '2019-12-31',
 	}
 	response=requests.get(band_data_url,params=data,headers=headers)
-	for daydata in response.json()['data']:
-		day = daydata['date_time']
-		print(day)
-		summary=json.loads(base64.b64decode(daydata['summary']))
-		for k,v in summary.items():
-			if k=='stp':
-				dump_step_data(day,v)
-			elif k=='slp':
-				dump_sleep_data(day,v)
+	print (response)
+	# Check if the request was successful (status code 200)
+	if response.status_code == 200:
+		# Parse JSON content
+		content = response.content.decode('utf-8')
+		data = json.loads(content)
+		
+		# Extract URLs from data
+		urls = [data["url"]]
+		
+		# Find URLs ending with .zip
+		zip_urls = [url for url in urls if url.endswith('.zip')]
+		
+		# Download zip files
+		for zip_url in zip_urls:
+			# Download the zip file
+			zip_response = requests.get(zip_url)
+
+			# Check if the request was successful (status code 200)
+			if zip_response.status_code == 200:
+				# Extract filename from URL
+				filename = zip_url.split('/')[-1]
+				# Open a file in binary write mode
+				with open(filename, "wb") as file:
+					# Write the binary content of the response to the file
+					file.write(zip_response.content)
+				print(f"Zip file '{filename}' downloaded successfully.")
 			else:
-				print(k,"=",v)
+				# If the request was not successful, print the status code
+				print(f"Failed to download zip file. Status code: {zip_response.status_code}")
+
+	# for daydata in response.json()['data']:
+		# day = daydata['date_time']
+		# print(day)
+		# summary=json.loads(base64.b64decode(daydata['summary']))
+		# for k,v in summary.items():
+			# if k=='stp':
+				# dump_step_data(day,v)
+			# elif k=='slp':
+				# dump_sleep_data(day,v)
+			# else:
+				# print(k,"=",v)
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--email",required=True,help="email address for login")
 	parser.add_argument("--password",required=True,help="password for login")
+	parser.add_argument("--url",required=True,help="url of qrcode")
 	args=parser.parse_args()
 	auth_info=mifit_auth_email(args.email,args.password)
-	get_band_data(auth_info)
+	get_watchface(auth_info,args.url)
 
 
 if __name__== "__main__":
