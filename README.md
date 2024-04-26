@@ -1,4 +1,4 @@
-# Reverse engineering of the Mi Fit API wit the goal to retrieve watchface create in https://watchface.zepp.com/designer/
+# Reverse engineering of the Mi Fit API wit the goal to retrieve watchface created in https://watchface.zepp.com/designer/
 
 ### Retrieving watchface
 
