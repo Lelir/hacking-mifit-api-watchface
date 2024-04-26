@@ -1,5 +1,16 @@
-# Reverse engineering of the Mi Fit API wit the goal to retrieve my stored fitness data
+# Reverse engineering of the Mi Fit API wit the goal to retrieve watchface create in https://watchface.zepp.com/designer/
 
+### Retrieving watchface
+
+- open your watchface created in https://watchface.zepp.com/designer/
+- Select run on device
+- decode the qr code link (you could use for example this site https://zxing.org/w/decode)
+- replace watchface:// with http://
+- run mifit_api.py --email email@mail.com --password fakepassword --url http://api-mifit-de2.zepp.com/custom/tools/app-dial/download/XXXXXXXX
+
+
+
+Below this is the requirement of the inital fork. I kept it like that and thanks @vanous for the code and information provided.
 ## Tools
 
 - a spare android device
